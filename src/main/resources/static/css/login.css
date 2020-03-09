@@ -55,3 +55,10 @@ html, body {
 	float: left;
 	text-align:center;
 }
+
+.layui-form-checked[lay-skin=primary] i{
+    border-color:#597FC0 !important;
+    background-color:#FFF !important;
+    color:#597FC0 !important;
+    font-weight: bold;
+}

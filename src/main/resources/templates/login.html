@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8" />
 <title>去吧管理平台-登录</title>
 <link rel="stylesheet" href="../layui/css/layui.css">
 <link rel="stylesheet" href="../css/login.css">
-<link rel="stylesheet"
-	href="../layui/css/modules/layui-icon-extend/iconfont.css">
+<link rel="stylesheet" href="../layui/css/modules/layui-icon-extend/iconfont.css">
 </head>
 <body>
 	<div class="login-main">
@@ -17,7 +16,7 @@
 		<div class="login-right">
 			<div class="layui-tab layui-tab-brief">
 				<ul class="layui-tab-title" style="text-align: center;">
-					<li class="layui-this">密码登录</li>
+					<li class="layui-this">账号登录</li>
 					<li>邮箱登录</li>
 				</ul>
 				<div class="layui-tab-content">
@@ -28,9 +27,9 @@
 								<label class="layui-form-label"><i
 									class="layui-icon layui-icon-username"></i></label>
 								<div class="layui-input-inline">
-									<input type="text" name="account" required
-										lay-verify="required" placeholder="请输入用户名" autocomplete="off"
-										class="layui-input" >
+									<input type="text" name="phone" required
+										lay-verify="required" placeholder="用户名/手机号" autocomplete="off"
+										class="layui-input" maxlength="11">
 								</div>
 							</div>
 							<div class="layui-form-item">
@@ -38,14 +37,17 @@
 									class="layui-icon layui-icon-password"></i></label>
 								<div class="layui-input-inline">
 									<input type="password" name="password" required
-										lay-verify="required" placeholder="请输入密码" autocomplete="off"
-										class="layui-input">
+										lay-verify="password" placeholder="请输入密码" autocomplete="off"
+										class="layui-input" maxlength="12">
 								</div>
+							</div>
+							<div class="layui-input-block" >
+								<input type="checkbox" name="loginStatus" lay-skin="primary" title="十天内免登录" checked="">
 							</div>
 							<div class="layui-form-item">
 								<div class="layui-input-block">
-									<button class="layui-btn" lay-submit lay-filter="formDemo"
-										style="width:83px;">登录</button>
+									<button class="layui-btn" lay-submit lay-filter="phoneLogin"
+										style="width:83px;" id="btn-login">登录</button>
 									<button type="layui-btn" class="layui-btn layui-btn-primary">找回密码</button>
 								</div>
 							</div>
@@ -56,27 +58,46 @@
 							<div class="layui-form-item">
 								<label class="layui-form-label"><i
 									class="iconfont layui-extendemail"></i></label>
-								<div class="layui-input-inline">
-									<input type="text" name="account" required
+								<div class="layui-input-inline" style="width:100px">
+									<input type="text" name="email" required
 										lay-verify="required" placeholder="请输入邮箱" autocomplete="off"
-										class="layui-input">
+										class="layui-input" >
 								</div>
+								<div class="layui-inline">
+							      <div class="layui-input-inline" style="width:105px;float:left">
+							        <select id="suffix" name="suffix" lay-verify="required" lay-search="" >
+							          <option value="qq" selected="selected">@qq.com</option>
+							          <option value="163">@163.com</option>
+							          <option value="gmail">@gmail.com</option>
+							          <option value="yahoo">@yahoo.com</option>
+							          <option value="msn">@msn.com</option>
+							          <option value="hotmail">@hotmail.com</option>
+							          <option value="aol">@aol.com</option>
+							          <option value="ask">@ask.com</option>
+							          <option value="yahoo">@yahoo.com</option>
+							          <option value="msn">@msn.com</option>
+							        </select>
+							      </div>
+							    </div>
 							</div>
 							<div class="layui-form-item">
 								<label class="layui-form-label"><i class="layui-icon layui-icon-vercode"></i></label>
-								<div class="layui-input-inline" style="width: 75px">
+								<div class="layui-input-inline" style="width: 100px">
 									<input type="text" name="code" required lay-verify="required"
-										placeholder="验证码" autocomplete="off" class="layui-input">
+										placeholder="验证码" autocomplete="off" class="layui-input" maxlength="6">
 								</div>
 								<button type="button" class="layui-btn" style="height: 38px"
 									id="btn-code">获取验证码</button>
 								<button type="button" class="layui-btn layui-btn-disabled" style="height: 38px"
-									id="btn-time">60s</button>
+									id="btn-time">已发送60s</button>
+							</div>
+							<div class="layui-input-block" >
+								<input type="checkbox" name="loginStatus" lay-skin="primary" title="十天内免登录" checked="">
 							</div>
 							<div class="layui-form-item">
 								<div class="layui-input-block">
-									<button class="layui-btn" lay-submit lay-filter="formDemo" style="width:83px;">登录</button>
-									<button type="layui-btn" class="layui-btn layui-btn-primary">找回密码</button>
+									<button class="layui-btn" lay-submit lay-filter="emailLogin" style="width:100px;">登录</button>
+									<button type="layui-btn" class="layui-btn layui-btn-primary" style="width:100px;">找回密码</button>
 								</div>
 							</div>
 						</form>
@@ -85,19 +106,24 @@
 			</div>
 		</div>
 	</div>
-
-	<script src="../layui/layui.js"></script>
+	<span th:text="${publickey}" id="publicKey"></span>
+	<script type="text/javascript" src="../layui/layui.js"></script>
+	<script type="text/javascript" src="../js/main.js"></script>
+	<script type="text/javascript" src="https://passport.cnblogs.com/scripts/jsencrypt.min.js"></script> 
 	<script type="text/javascript">
-		layui.use(['element','layer','jquery'], function() {
+		layui.use(['element','layer','jquery','form'], function() {
 			var element = layui.element,
 			layer = layui.layer,
-			$ = layui.jquery;
+			$ = layui.jquery,
+			form = layui.form;
 			$(document).ready(function(){
 		        $("#btn-time").hide();
+		        $("#publicKey").hide();
 		    });
-			times = 60, // 别忘了改这里
-			$(document).on('click', '#btn-code', function() {
-		        timer = null;
+			// 生成验证码
+			function getCode(){
+				times = 60;
+				timer = null;
 		        // 计时开始
 		        $("#btn-code").hide();
 		        $("#btn-time").show();
@@ -107,13 +133,165 @@
 		            	$("#btn-code").show();
 		            	$("#btn-time").hide();
 		                clearInterval(timer);
-		                times = 60;  // 别忘了改这里
+		                times = 60;  
 		            } else {
-		            	$("#btn-time").text(times + 's');
+		            	$("#btn-time").text('已发送'+times + 's');
 		            } 
 		        }, 1000);
+			}
+			
+			$(document).on('click', '#btn-code', function() {
+				var email = $("input[name='email']").val();
+				if(email == null || email == ''){
+					layer.alert("请先输入邮箱");
+					return false;
+				}
+				email = email + '@'+$("#suffix").val()+'.com';
+				$.ajax({
+                    url: '/user/sendCode.htm',
+                    type: 'POST',
+                    async: true,
+                    cache: false,
+                    data: {
+                    	'email':email
+                    },
+                    dataType:"json",
+                    success: function (res) {
+                        if (res.success) {
+                        	getCode();
+                            showSuccess("发送成功");
+                        } else {
+                            layer.alert(res.errorMsg);
+                        }
+                    }
+                });
 			});
-		});
+			form.verify({
+			    password: [
+			      /^[\S]{6,12}$/
+			      ,'密码必须6到12位，且不能出现空格'
+			    ],
+			    code:function(data){
+			    	if(data.length < 6){
+			    		return '验证码为6位数字';
+			    	}
+			    }
+			});
+			form.on('submit(phoneLogin)', function(data){
+				// 获取公钥
+				var publicKey = $("#publicKey").text();
+				var encrypt = new JSEncrypt();
+		        encrypt.setPublicKey('-----BEGIN PUBLIC KEY-----' + publicKey + '-----END PUBLIC KEY-----');
+		        var encPassword = encrypt.encrypt($("input[name='password']").val());
+				data.field.password = encPassword;
+				// 判断是选择十天免登陆
+				if(data.field.loginStatus == 'on'){
+					data.field.loginStatus = 1;
+				}else{
+					data.field.loginStatus = 0;
+				}
+		        var i;
+                $.ajax({
+                    url: '/user/login.htm',
+                    type: 'POST',
+                    async: true,
+                    cache: false,
+                    data: data.field,
+                    dataType:"json",
+                    beforeSend:function(){
+                    	i=showLoad("登录中...");
+                    },
+                    success: function (res) {
+                    	if (res.success) {
+                            closeLoad(i);
+                            openWebSocket(data.field.phone+'-login')
+                        } else {
+                            closeLoad(i);
+                            layer.alert(res.errorMsg);
+                        }
+                    }
+                });
+                // 以下是阻止layui表单再次提交
+                parent.layer.closeAll();
+                return false;
+			});
+			
+			form.on('submit(emailLogin)', function(data){
+				data.field.email = data.field.email + '@'+$("#suffix").val()+'.com';
+				if(data.field.loginStatus == 'on'){
+					data.field.loginStatus = 1;
+				}else{
+					data.field.loginStatus = 0;
+				}
+				var i;
+				$.ajax({
+                    url: 'user/login.htm',
+                    type: 'POST',
+                    async: true,
+                    cache: false,
+                    data: data.field,
+                    dataType:"json",
+                    beforeSend: function () {
+                      i=showLoad("登录中...");
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            closeLoad(i);
+                            openWebSocket(data.field.phone+'login')
+                        } else {
+                            closeLoad(i);
+                            layer.alert(res.errorMsg);
+                        }
+                    }
+                });
+				// 以下是阻止layui表单再次提交
+                parent.layer.closeAll();
+                return false;
+			});
+			
+			function openWebSocket(sid) { // sid为当前登录用户的phone+'login'
+			    var socket;
+			    if(typeof(WebSocket) == undefined) {
+			        console.log("您的浏览器不支持WebSocket");
+			    }else{
+			        //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+			        socket = new WebSocket("ws://127.0.0.1:8082/websocket/"+sid);
+
+			        //打开事件
+			        socket.onopen = function() {
+			            console.log("Socket 已打开");
+			            //socket.send("这是来自客户端的消息" + location.href + new Date());
+			        };
+
+			        //获得消息事件
+			        socket.onmessage = function(msg) {
+			            if (msg.data == "80002") {
+			                alert("对不起，你的账号已经在其它地方登录，若非本人操作，请及时更换密码...");
+			                window.location.href = "/login.htm";
+			                return;
+			            }else{
+			            	showSuccess("登录成功");
+			            	window.location.href = "/main.htm";
+			            	return;
+			            }
+			        };
+
+			        //关闭事件
+			        socket.onclose = function() {
+			            console.log("Socket已关闭");
+			        };
+
+			        //发生了错误事件
+			        socket.onerror = function() {
+			            alert("Socket发生了错误");
+			        };
+
+			        $(window).unload(function(){
+			            socket.close();
+			        });
+			    }
+			}
+		}); 
 	</script>
 </body>
 </html>
